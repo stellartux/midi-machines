@@ -20,7 +20,7 @@ main, .light {
   --pad-color: #c2d7ee;
   --pad-shadow-color: #8297ae;
   --touch-color: #777777;
-  box-shadow: 1vw 1vw 1vw var(--body-shadow-color);
+  box-shadow: 1vw 1vw 1vw #000000cc;
 }
 @media (prefers-color-scheme: dark) {
   main {
