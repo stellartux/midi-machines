@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
+<head>
+<meta charset="utf-8">
+<title>Test page</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script src="src/nanopad2.js" type="module" charset="utf-8"></script>
+
+</head>
+
+<body>
+<korg-nanopad2 mode="light">
+</korg-nanopad2>
+<input type="checkbox" onclick="document.querySelector('korg-nanopad2').setAttribute('mode', this.checked ? 'dark' : 'light')">
+</body>
+
+</html>
