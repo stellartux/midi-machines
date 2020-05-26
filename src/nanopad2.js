@@ -130,6 +130,12 @@ label button {
   background-color: var(--pad-color);
   height: 100%;
 }
+.pad button:active {
+  background: radial-gradient(var(--pad-shadow-color), var(--pad-color));
+}
+.pad button:focus {
+  outline: none;
+}
 .led {
   width: 0.7vw;
   height: 0.7vw;
