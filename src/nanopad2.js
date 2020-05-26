@@ -4,15 +4,6 @@ class KorgNanopad2 extends HTMLElement {
     this.attachShadow({ mode: 'open' })
     const style = document.createElement('style')
     style.innerText = `
-@import url('https://fonts.googleapis.com/css2?family=Changa:wght@300;700&display=swap');
-.dark {
-  --text-color: #999999;
-  --body-color: #222222;
-  --body-shadow-color: #555555;
-  --pad-color: #303030;
-  --pad-shadow-color: #555555;
-  --touch-color: #777777;
-}
 main, .light {
   --text-color: #666666;
   --body-color: #dddddd;
@@ -20,7 +11,14 @@ main, .light {
   --pad-color: #c2d7ee;
   --pad-shadow-color: #8297ae;
   --touch-color: #777777;
-  box-shadow: 1vw 1vw 1vw #000000cc;
+  --button-color: var(--body-color);
+}
+.dark {
+  --text-color: #999999;
+  --body-color: #222222;
+  --body-shadow-color: #555555;
+  --pad-color: #303030;
+  --pad-shadow-color: #555555;
 }
 @media (prefers-color-scheme: dark) {
   main {
@@ -28,14 +26,27 @@ main, .light {
     --body-color: #222222;
     --body-shadow-color: #555555;
     --pad-color: #303030;
-    --touch-color: #777777;
+    --pad-shadow-color: #555555;
   }
+}
+.orange-green {
+  --text-color: #7d9b39;
+  --pad-color: #fbc65e;
+  --pad-shadow-color: #7f6d3b;
+  --button-color: #f77612;
+}
+.blue-yellow {
+  --text-color: #cecc7a;
+  --pad-color: #557cc1;
+  --pad-shadow-color: #344967;
+  --button-color: #9ad0ea;
 }
 * {
   box-sizing: border-box;
   user-select: none;
 }
 main {
+  box-shadow: 1vw 1vw 1vw #000000cc;
   color: var(--text-color);
   background-color: var(--body-color);
   display: grid;
@@ -96,7 +107,7 @@ label button {
   align-self: center;
   width: 2.5vw;
   height: 1.2vw;
-  background-color: var(--body-color);
+  background-color: var(--button-color);
   border: thick outset var(--body-shadow-color);
   border-radius: 2vw;
 }
@@ -266,10 +277,11 @@ label button {
 
   attributeChangedCallback(name, oldValue, newValue) {
     if (name === 'mode') {
-      if (oldValue === 'light' || oldValue === 'dark') {
+      const modes = ['light', 'dark', 'orange-green', 'blue-yellow']
+      if (modes.includes(oldValue)) {
         this.main.classList.remove(oldValue)
       }
-      if (newValue === 'light' || newValue === 'dark') {
+      if (modes.includes(newValue)) {
         this.main.classList.add(newValue)
       }
     }

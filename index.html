@@ -3,22 +3,47 @@
 
 <head>
 <meta charset="utf-8">
-<title>Test page</title>
+<title>nanoPAD2</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script src="src/nanopad2.js" type="module" charset="utf-8"></script>
 <style media="screen">
+body {
+  display: flex;
+  flex-direction: column;
+  margin: auto;
+  font-family: sans-serif;
+}
 @media (prefers-color-scheme: dark) {
   body {
     background-color: #404040;
+    color: #eeeeee;
   }
+}
+.options {
+  max-width: 80ch;
+  margin: 5vh auto;
 }
 </style>
 </head>
 
 <body>
-<korg-nanopad2 mode="light">
+
+<korg-nanopad2>
 </korg-nanopad2>
-<input type="checkbox" onclick="document.querySelector('korg-nanopad2').setAttribute('mode', this.checked ? 'dark' : 'light')">
+
+<section class="options">
+  <label>
+    Mode
+  <select name="mode" onchange="document.querySelector('korg-nanopad2').setAttribute('mode', this.value)">
+  <option value="auto">Auto</option>
+  <option value="light">Light</option>
+  <option value="dark">Dark</option>
+  <option value="orange-green">Orange Green</option>
+  <option value="blue-yellow">Blue Yellow</option>
+  </select>
+  </label>
+</section>
+
 </body>
 
 </html>
