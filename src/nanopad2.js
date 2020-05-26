@@ -173,7 +173,7 @@ label button {
     this.main.append(this.led)
 
     const brand = document.createElement('div')
-    brand.innerText = 'GROK'
+    brand.innerText = 'KROG'
     brand.classList.add('brand')
     this.main.append(brand)
     const model = document.createElement('div')
