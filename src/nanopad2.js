@@ -71,7 +71,7 @@ main {
 }
 .brand {
   place-self: center;
-  font-size: 1.6rem;
+  font-size: 2vw;
   font-weight: 700;
 }
 .model {
@@ -156,8 +156,7 @@ label button {
 }
 .led.lit {
   background-color: red;
-}
-    `
+}`
     this.shadowRoot.append(style)
 
     this.main = document.createElement('main')
@@ -241,30 +240,57 @@ label button {
     padTemplate.append(document.createElement('div'))
     padTemplate.append(document.createElement('button'))
 
-    for (const text of [
-      'C / Chromatic',
-      'C♯ / Major1',
-      'D / Major2',
-      'D♯ / M.Penta',
-      'E / M.Blues',
-      'F / Bass Line',
-      'F♯ / China',
-      'G / 4th',
-      'G♯ / User',
-      'A / minor1',
-      'A♯ / minor2',
-      'B / m.Penta',
-      'Range - / m.Blues',
-      'Range + / Raga',
-      'Oct - / Ryukyu',
-      'Oct + / 5th',
-    ]) {
-      const pad = padTemplate.cloneNode(true)
-      pad.children[0].innerText = text
-      this.main.append(pad)
+    const nanopad = this
+    const padCallback = function(event) {
+      const eventType = {
+        mousedown: 'paddown',
+        mouseup: 'padup',
+        click: 'padclick',
+      }[event.type]
+      nanopad.dispatchEvent(
+        new CustomEvent(eventType, {
+          detail: {
+            padElement: this,
+            noteNumber: this.noteNumber + 16 * currentlyLit,
+          },
+        })
+      )
     }
 
+    ;[
+      ['C / Chromatic', 37],
+      ['C♯ / Major1', 39],
+      ['D / Major2', 41],
+      ['D♯ / M.Penta', 43],
+      ['E / M.Blues', 45],
+      ['F / Bass Line', 47],
+      ['F♯ / China', 49],
+      ['G / 4th', 51],
+      ['G♯ / User', 36],
+      ['A / minor1', 38],
+      ['A♯ / minor2', 40],
+      ['B / m.Penta', 42],
+      ['Range - / m.Blues', 44],
+      ['Range + / Raga', 46],
+      ['Oct - / Ryukyu', 48],
+      ['Oct + / 5th', 50],
+    ].forEach(([text, noteNumber]) => {
+      const pad = padTemplate.cloneNode(true)
+      pad.noteNumber = noteNumber
+      pad.children[0].innerText = text
+      pad.addEventListener('mousedown', padCallback)
+      pad.addEventListener('mouseup', padCallback)
+      pad.addEventListener('click', padCallback)
+      this.main.append(pad)
+    })
+
     this.shadowRoot.append(this.main)
+
+    this.eventHandlers = {
+      onpaddown: null,
+      onpadup: null,
+      onpadclick: null,
+    }
   }
 
   get [Symbol.toStringTag]() {
@@ -272,17 +298,31 @@ label button {
   }
 
   static get observedAttributes() {
-    return ['mode']
+    return ['mode', 'onpaddown', 'onpadup', 'onpadclick']
+  }
+
+  static get modes() {
+    return ['light', 'dark', 'orange-green', 'blue-yellow']
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
     if (name === 'mode') {
-      const modes = ['light', 'dark', 'orange-green', 'blue-yellow']
-      if (modes.includes(oldValue)) {
+      if (KorgNanopad2.modes.includes(oldValue)) {
         this.main.classList.remove(oldValue)
       }
-      if (modes.includes(newValue)) {
+      if (KorgNanopad2.modes.includes(newValue)) {
         this.main.classList.add(newValue)
+      }
+    } else if (KorgNanopad2.observedAttributes.includes(name)) {
+      if (this.eventHandlers[name] !== null) {
+        this.removeEventListener(name.slice(2), this.eventHandlers[name])
+        this.eventHandlers[name] = null
+      }
+      try {
+        this.eventHandlers[name] = new Function('event', newValue)
+        this.addEventListener(name.slice(2), this.eventHandlers[name])
+      } catch (error) {
+        console.error(error)
       }
     }
   }
