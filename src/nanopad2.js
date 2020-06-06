@@ -336,11 +336,4 @@ label button {
   }
 }
 
-const fonts = document.createElement('link')
-fonts.setAttribute(
-  'href',
-  'https://fonts.googleapis.com/css2?family=Changa:wght@400;700&display=swap'
-)
-fonts.setAttribute('rel', 'stylesheet')
-document.head.append(fonts)
 customElements.define('korg-nanopad2', KorgNanopad2)
