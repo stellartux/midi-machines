@@ -45,7 +45,7 @@ The event listener callback receives a CustomEvent with a [detail](https://devel
 ```ts
 interface Details {
   noteNumber: number,
-  pad?: HTMLElement // only available if event was fired through DOM
+  padElement?: HTMLElement // only available if event was fired through DOM
 }
 ```
 
