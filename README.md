@@ -1,7 +1,9 @@
 # midi-machines
 
 ## \<korg-nanopad2\> Custom Element
+
 ### Install
+
 Add the following code to the head of your HTML document.
 
 ```html
@@ -10,9 +12,11 @@ Add the following code to the head of your HTML document.
 ```
 
 ### API
+
 #### Attributes
 
 The following attributes can be changed either in HTML or with [`setAttribute()`](https://developer.mozilla.org/en-US/docs/Web/API/Element/setAttribute)
+
 * `mode` - The colour scheme of the nanoPAD2
   * `auto` Default, chooses `light` or `dark` based on browser's preferred colour scheme.
   * `light`
@@ -23,7 +27,8 @@ The following attributes can be changed either in HTML or with [`setAttribute()`
 * `onpadrelease` - Pad release event listener
 * `onpadclick` - Pad click event listener
 
-##### Example
+##### HTML Attribute Example
+
 ```html
 <korg-nanopad2
     mode="dark"
@@ -37,11 +42,13 @@ The following attributes can be changed either in HTML or with [`setAttribute()`
 #### Events
 
 It is also possible to listen for pad events through the following [CustomEvents](https://developer.mozilla.org/en-US/docs/Web/API/CustomEvent).
+
 * `padpress`
 * `padrelease`
 * `padclick`
 
 The event listener callback receives a CustomEvent with a [detail](https://developer.mozilla.org/en-US/docs/Web/API/CustomEvent/detail) property with the following interface.
+
 ```ts
 interface Details {
   noteNumber: number,
@@ -49,7 +56,7 @@ interface Details {
 }
 ```
 
-##### Example
+##### JavaScript Event Listener Example
 
 ```js
 document.querySelector('korg-nanopad2')
