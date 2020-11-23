@@ -1,3 +1,4 @@
+//@ts-nocheck
 class KorgNanopad2 extends HTMLElement {
   constructor() {
     super()
