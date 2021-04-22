@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
+<head>
+  <meta charset="utf-8">
+  <title>nanoPAD2</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="../src/nanopad2.js" type="module" charset="utf-8"></script>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Changa:wght@400;700&display=swap">
+  <style media="screen">
+    body {
+      display: flex;
+      flex-direction: column;
+      margin: auto;
+      font-family: sans-serif;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      body {
+        background-color: #404040;
+        color: #eeeeee;
+      }
+    }
+
+    .options {
+      max-width: 80ch;
+      margin: 5vh auto;
+      display: flex;
+      flex-direction: column;
+    }
+
+  </style>
+</head>
+
+<body>
+
+  <korg-nanopad2 onpaddown="console.log('Pressed ' + event.detail.pitch)">
+  </korg-nanopad2>
+
+  <section class="options">
+    <label>
+      Colour scheme
+      <select name="color-scheme">
+        <option value="auto">Auto</option>
+        <option value="light">Light</option>
+        <option value="dark">Dark</option>
+        <option value="orange-green">Orange Green</option>
+        <option value="blue-yellow">Blue Yellow</option>
+      </select>
+    </label>
+    <label>
+      MIDI access
+      <input type="checkbox" name="midi">
+    </label>
+
+    <script>
+      const nanopad = document.querySelector('korg-nanopad2')
+
+      document.querySelector('input[name="midi"]').onchange = function () {
+        nanopad.setAttribute('midi', this.checked)
+      }
+
+      document.querySelector('select[name="color-scheme"]').onchange = function () {
+        nanopad.setAttribute('color-scheme', this.value)
+      }
+
+      nanopad.addEventListener('padup', ({ detail: { pitch }}) => { 
+        console.log(`Released ${pitch}`)
+      })
+    </script>
+  </section>
+
+  <section class="codeblocks">
+    <label>
+      
+    </label>
+  </section>
+
+</body>
+
+</html>

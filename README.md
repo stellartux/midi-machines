@@ -17,24 +17,22 @@ Add the following code to the head of your HTML document.
 
 The following attributes can be changed either in HTML or with [`setAttribute()`](https://developer.mozilla.org/en-US/docs/Web/API/Element/setAttribute)
 
-* `mode` - The colour scheme of the nanoPAD2
+* `color-scheme` - The colour scheme of the nanoPAD2
   * `auto` Default, chooses `light` or `dark` based on browser's preferred colour scheme.
   * `light`
   * `dark`
   * `orange-green`
   * `blue-yellow`
-* `onpadpress` - Pad press event listener
-* `onpadrelease` - Pad release event listener
-* `onpadclick` - Pad click event listener
+* `onpaddown` - Pad press event listener
+* `onpadup` - Pad release event listener
 
 ##### HTML Attribute Example
 
 ```html
 <korg-nanopad2
-    mode="dark"
-    onpadpress="console.log(`Note ${event.detail.noteNumber} pressed!`)"
-    onpadrelease="console.log(`Note ${event.detail.noteNumber} released!`)"
-    onpadclick="console.log(`Note ${event.detail.noteNumber} pressed and released!`)"
+    color-scheme="dark"
+    onpaddown="console.log(`Note ${event.detail.pitch} pressed!`)"
+    onpadup="console.log(`Note ${event.detail.pitch} released!`)"
 >
 </korg-nanopad2>
 ```
@@ -43,16 +41,15 @@ The following attributes can be changed either in HTML or with [`setAttribute()`
 
 It is also possible to listen for pad events through the following [CustomEvents](https://developer.mozilla.org/en-US/docs/Web/API/CustomEvent).
 
-* `padpress`
-* `padrelease`
-* `padclick`
+* `paddown`
+* `padup`
 
 The event listener callback receives a CustomEvent with a [detail](https://developer.mozilla.org/en-US/docs/Web/API/CustomEvent/detail) property with the following interface.
 
 ```ts
-interface Details {
-  noteNumber: number,
-  padElement?: HTMLElement // only available if event was fired through DOM
+interface NoteEventDetails {
+  pitch: number, // MIDI note number
+  velocity: number // in range 0-127, defaults to 80 if not specified
 }
 ```
 
@@ -60,7 +57,7 @@ interface Details {
 
 ```js
 document.querySelector('korg-nanopad2')
-  .addEventListener('padpress', event => {
-    console.log(`Note $(event.detail.noteNumber) pressed!`)
+  .addEventListener('paddown', event => {
+    console.log(`Note $(event.detail.pitch) pressed!`)
   })
 ```

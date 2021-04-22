@@ -1,5 +1,7 @@
 //@ts-nocheck
 class KorgNanopad2 extends HTMLElement {
+  access = null
+  input = null
   constructor() {
     super()
     this.attachShadow({ mode: 'open' })
@@ -141,8 +143,10 @@ label button {
   border-radius: 0.4vw;
   background-color: var(--pad-color);
   height: 100%;
+  aspect-ratio: 1/1;
 }
-.pad button:active {
+.pad button:active,
+.pad.active button {
   background: radial-gradient(var(--pad-shadow-color), var(--pad-color));
 }
 .pad button:focus {
@@ -161,13 +165,13 @@ label button {
     this.shadowRoot.append(style)
 
     this.main = document.createElement('main')
-    if (this.getAttribute('mode') === 'light') {
+    if (this.getAttribute('color-scheme') === 'light') {
       this.main.classList.add('light')
     }
 
     this.led = document.createElement('div')
     this.led.id = 'connectled'
-    this.led.addEventListener('click', function() {
+    this.led.addEventListener('mousedown', function () {
       this.classList.toggle('lit')
     })
     this.main.append(this.led)
@@ -200,7 +204,7 @@ label button {
     ]) {
       const button = buttonTemplate.cloneNode(true)
       button.children[1].innerText = text
-      button.addEventListener('click', function() {
+      button.addEventListener('mousedown', function () {
         button.children[0].classList.toggle('lit')
       })
       buttons.append(button)
@@ -225,7 +229,7 @@ label button {
       scene.append(led)
     }
     let currentlyLit = 1
-    scene.firstChild.addEventListener('click', () => {
+    scene.firstChild.addEventListener('mousedown', () => {
       scene.children[currentlyLit].firstChild.classList.remove('lit')
       currentlyLit = (currentlyLit & 3) + 1
       scene.children[currentlyLit].firstChild.classList.add('lit')
@@ -242,20 +246,21 @@ label button {
     padTemplate.append(document.createElement('button'))
 
     const nanopad = this
-    const padCallback = function(event) {
-      const eventType = {
-        mousedown: 'paddown',
-        mouseup: 'padup',
-        click: 'padclick',
-      }[event.type]
-      nanopad.dispatchEvent(
-        new CustomEvent(eventType, {
-          detail: {
-            padElement: this,
-            noteNumber: this.noteNumber + 16 * currentlyLit,
-          },
-        })
-      )
+    const padCallback = function (event) {
+      if (event.button === 0) {
+        const eventType = {
+          mousedown: 'paddown',
+          mouseup: 'padup',
+        }[event.type]
+        nanopad.dispatchEvent(
+          new CustomEvent(eventType, {
+            detail: {
+              pitch: parseInt(this.dataset.pitch) + 16 * currentlyLit,
+              velocity: 80,
+            },
+          })
+        )
+      }
     }
 
     ;[
@@ -277,11 +282,10 @@ label button {
       ['Oct + / 5th', 50],
     ].forEach(([text, noteNumber]) => {
       const pad = padTemplate.cloneNode(true)
-      pad.noteNumber = noteNumber
+      pad.dataset.pitch = noteNumber
       pad.children[0].innerText = text
       pad.addEventListener('mousedown', padCallback)
       pad.addEventListener('mouseup', padCallback)
-      pad.addEventListener('click', padCallback)
       this.main.append(pad)
     })
 
@@ -290,7 +294,6 @@ label button {
     this.eventHandlers = {
       onpaddown: null,
       onpadup: null,
-      onpadclick: null,
     }
   }
 
@@ -299,20 +302,32 @@ label button {
   }
 
   static get observedAttributes() {
-    return ['mode', 'onpaddown', 'onpadup', 'onpadclick']
+    return ['color-scheme', 'midi', 'onpaddown', 'onpadup']
   }
 
-  static get modes() {
+  static get colorSchemes() {
     return ['light', 'dark', 'orange-green', 'blue-yellow']
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
-    if (name === 'mode') {
-      if (KorgNanopad2.modes.includes(oldValue)) {
+    if (name === 'color-scheme') {
+      if (KorgNanopad2.colorSchemes.includes(oldValue)) {
         this.main.classList.remove(oldValue)
       }
-      if (KorgNanopad2.modes.includes(newValue)) {
+      if (KorgNanopad2.colorSchemes.includes(newValue)) {
         this.main.classList.add(newValue)
+      }
+    } else if (name === 'midi') {
+      if (!!newValue && newValue !== 'false') {
+        this.setupMIDI().then(
+          (success) => success || console.warn('MIDI set up failed')
+        )
+      } else {
+        if (this.input) {
+          this.input.onmidimessage = null
+        }
+        this.input = null
+        this.access = null
       }
     } else if (KorgNanopad2.observedAttributes.includes(name)) {
       if (this.eventHandlers[name] !== null) {
@@ -329,11 +344,62 @@ label button {
   }
 
   async setupMIDI() {
-    const access = await navigator.requestMIDIAccess({ sysex: true })
-    this.input = [...access.inputs.values()].find(
-      input => input.name === 'nanoPAD2'
-    )
-    return !!this.input
+    if (!this.access) {
+      this.access = await navigator.requestMIDIAccess?.({ sysex: true })
+      if (!this.access) {
+        return false
+      }
+    }
+    if (!this.input) {
+      this.input = [...this.access.inputs.values()].find(
+        (input) => input.name === 'nanoPAD2'
+      )
+      if (!this.input) {
+        return false
+      }
+    }
+    this.input.onmidimessage = this.onMIDIMessage.bind(this)
+    return true
+  }
+
+  onMIDIMessage({ data }) {
+    const pitchToPad = (pitch) =>
+      this.main.querySelector(`.pad[data-pitch="${((pitch - 36) & 0xf) + 36}"]`)
+
+    const [eventType, pitch, velocity] = data
+    if (eventType === 144) {
+      // NOTEON
+      this.dispatchEvent(
+        new CustomEvent('paddown', {
+          detail: {
+            pitch,
+            velocity,
+          },
+        })
+      )
+      pitchToPad(pitch)?.classList?.add('active')
+    } else if (eventType === 128) {
+      // NOTEOFF
+      this.dispatchEvent(
+        new CustomEvent('padup', {
+          detail: {
+            pitch,
+            velocity,
+          },
+        })
+      )
+      pitchToPad(pitch)?.classList?.remove('active')
+    } else if (eventType === 177) {
+      // PAD XY MOVEMENT
+      console.log(data)
+      this.dispatchEvent(
+        new CustomEvent('xymove', {
+          detail: {},
+        })
+      )
+    } else {
+      console.log(data)
+    }
   }
 }
 
