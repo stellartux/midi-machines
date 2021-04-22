@@ -2,6 +2,7 @@
 class KorgNanopad2 extends HTMLElement {
   access = null
   input = null
+  _selectedScene = 1
   constructor() {
     super()
     this.attachShadow({ mode: 'open' })
@@ -228,11 +229,8 @@ label button {
       led.children[1].innerText = i
       scene.append(led)
     }
-    let currentlyLit = 1
-    scene.firstChild.addEventListener('mousedown', () => {
-      scene.children[currentlyLit].firstChild.classList.remove('lit')
-      currentlyLit = (currentlyLit & 3) + 1
-      scene.children[currentlyLit].firstChild.classList.add('lit')
+    scene.firstChild.addEventListener('pointerdown', () => {
+      this.selectedScene += 1
     })
     this.main.append(scene)
 
@@ -255,7 +253,7 @@ label button {
         nanopad.dispatchEvent(
           new CustomEvent(eventType, {
             detail: {
-              pitch: parseInt(this.dataset.pitch) + 16 * currentlyLit,
+              pitch: parseInt(this.dataset.pitch) + 16 * nanopad.selectedScene,
               velocity: 80,
             },
           })
@@ -302,7 +300,7 @@ label button {
   }
 
   static get observedAttributes() {
-    return ['color-scheme', 'midi', 'onpaddown', 'onpadup']
+    return ['color-scheme', 'midi', 'onpaddown', 'onpadup', 'onxymove']
   }
 
   static get colorSchemes() {
@@ -421,16 +419,45 @@ label button {
       )
       pitchToPad(pitch)?.classList?.remove('active')
     } else if (eventType === 177) {
-      // PAD XY MOVEMENT
-      console.log(data)
+      // XY pad touch
       this.dispatchEvent(
         new CustomEvent('xymove', {
-          detail: {},
+          detail:
+            data[1] === 1
+              ? {
+                  x: data[2],
+                }
+              : {
+                  y: data[2],
+                },
         })
       )
+    } else if (
+      data.length === 11 &&
+      data
+        .slice(0, 9)
+        .every((v, i) => v === [240, 66, 64, 0, 1, 18, 0, 95, 79][i])
+    ) {
+      // scene change
+      this.selectedScene = data[9] + 1
     } else {
-      console.log(data)
+      console.info('Unhandled MIDI event', data)
     }
+  }
+
+  get selectedScene() {
+    return this._selectedScene
+  }
+
+  /** @param {number} value in range 1-4, inclusive */
+  set selectedScene(value) {
+    this.main
+      .querySelector(`#scene div:nth-of-type(${this._selectedScene}) div.led`)
+      .classList.remove('lit')
+    this._selectedScene = ((value - 1) & 3) + 1
+    this.main
+      .querySelector(`#scene div:nth-of-type(${this._selectedScene}) div.led`)
+      .classList.add('lit')
   }
 }
 
