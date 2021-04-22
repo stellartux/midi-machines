@@ -319,15 +319,14 @@ label button {
       }
     } else if (name === 'midi') {
       if (!!newValue && newValue !== 'false') {
-        this.setupMIDI().then(
-          (success) => success || console.warn('MIDI set up failed')
-        )
+        this.connectMIDI().then((success) => {
+          if (!success) {
+            this.led.classList.remove('lit')
+            console.warn('MIDI set up failed')
+          }
+        })
       } else {
-        if (this.input) {
-          this.input.onmidimessage = null
-        }
-        this.input = null
-        this.access = null
+        this.disconnectMIDI()
       }
     } else if (KorgNanopad2.observedAttributes.includes(name)) {
       if (this.eventHandlers[name] !== null) {
@@ -343,23 +342,55 @@ label button {
     }
   }
 
-  async setupMIDI() {
+  connectInput(port) {
+    this.input = port
+    this.input.onmidimessage = this.onMIDIMessage.bind(this)
+    this.led.classList.add('lit')
+  }
+
+  disconnectInput() {
+    if (this.input) {
+      this.input.onmidimessage = null
+    }
+    this.input = null
+    this.led.classList.remove('lit')
+  }
+
+  /** @return {boolean} true if the connection is successful */
+  async connectMIDI() {
     if (!this.access) {
       this.access = await navigator.requestMIDIAccess?.({ sysex: true })
       if (!this.access) {
         return false
       }
-    }
-    if (!this.input) {
-      this.input = [...this.access.inputs.values()].find(
-        (input) => input.name === 'nanoPAD2'
-      )
       if (!this.input) {
-        return false
+        const input = [...this.access.inputs.values()].find(
+          (input) => input.name === 'nanoPAD2'
+        )
+        if (input) {
+          this.connectInput(input)
+        }
       }
+      this.access.onstatechange = function (event) {
+        if (event.port.name === 'nanoPAD2' && event.port.type === 'input') {
+          if (event.port.state === 'connected') {
+            this.connectInput(event.port)
+          } else if (event.port.state === 'disconnected') {
+            this.disconnectInput()
+          }
+        }
+      }.bind(this)
+      return true
     }
-    this.input.onmidimessage = this.onMIDIMessage.bind(this)
-    return true
+    return false
+  }
+
+  disconnectMIDI() {
+    this.disconnectInput()
+    if (this.access) {
+      this.access.onstatechange = null
+    }
+    this.access = null
   }
 
   onMIDIMessage({ data }) {
