@@ -3,6 +3,10 @@ class KorgNanopad2 extends HTMLElement {
   access = null
   input = null
   _selectedScene = 1
+  eventHandlers = {
+    onpaddown: null,
+    onpadup: null,
+  }
   constructor() {
     super()
     this.attachShadow({ mode: 'open' })
@@ -144,7 +148,6 @@ label button {
   border-radius: 0.4vw;
   background-color: var(--pad-color);
   height: 100%;
-  aspect-ratio: 1/1;
 }
 .pad button:active,
 .pad.active button {
@@ -172,9 +175,6 @@ label button {
 
     this.led = document.createElement('div')
     this.led.id = 'connectled'
-    this.led.addEventListener('mousedown', function () {
-      this.classList.toggle('lit')
-    })
     this.main.append(this.led)
 
     const brand = document.createElement('div')
@@ -205,7 +205,7 @@ label button {
     ]) {
       const button = buttonTemplate.cloneNode(true)
       button.children[1].innerText = text
-      button.addEventListener('mousedown', function () {
+      button.addEventListener('pointerdown', function () {
         button.children[0].classList.toggle('lit')
       })
       buttons.append(button)
@@ -247,8 +247,8 @@ label button {
     const padCallback = function (event) {
       if (event.button === 0) {
         const eventType = {
-          mousedown: 'paddown',
-          mouseup: 'padup',
+          pointerdown: 'paddown',
+          pointerup: 'padup',
         }[event.type]
         nanopad.dispatchEvent(
           new CustomEvent(eventType, {
@@ -282,17 +282,12 @@ label button {
       const pad = padTemplate.cloneNode(true)
       pad.dataset.pitch = noteNumber
       pad.children[0].innerText = text
-      pad.addEventListener('mousedown', padCallback)
-      pad.addEventListener('mouseup', padCallback)
+      pad.addEventListener('pointerdown', padCallback)
+      pad.addEventListener('pointerup', padCallback)
       this.main.append(pad)
     })
 
     this.shadowRoot.append(this.main)
-
-    this.eventHandlers = {
-      onpaddown: null,
-      onpadup: null,
-    }
   }
 
   get [Symbol.toStringTag]() {
@@ -397,7 +392,7 @@ label button {
 
     const [eventType, pitch, velocity] = data
     if (eventType === 144) {
-      // NOTEON
+      // note on
       this.dispatchEvent(
         new CustomEvent('paddown', {
           detail: {
@@ -408,7 +403,7 @@ label button {
       )
       pitchToPad(pitch)?.classList?.add('active')
     } else if (eventType === 128) {
-      // NOTEOFF
+      // note off
       this.dispatchEvent(
         new CustomEvent('padup', {
           detail: {

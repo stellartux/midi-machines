@@ -1,50 +1,16 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
-
+<html lang="en">
 <head>
-<meta charset="utf-8">
-<title>nanoPAD2</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<script src="src/nanopad2.js" type="module" charset="utf-8"></script>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Changa:wght@400;700&display=swap">
-<style media="screen">
-body {
-  display: flex;
-  flex-direction: column;
-  margin: auto;
-  font-family: sans-serif;
-}
-@media (prefers-color-scheme: dark) {
-  body {
-    background-color: #404040;
-    color: #eeeeee;
-  }
-}
-.options {
-  max-width: 80ch;
-  margin: 5vh auto;
-}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MIDI Machines</title>
 </head>
-
 <body>
-
-<korg-nanopad2 onpaddown="console.log(event.detail.noteNumber)">
-</korg-nanopad2>
-
-<section class="options">
-  <label>
-    Mode
-  <select name="mode" onchange="document.querySelector('korg-nanopad2').setAttribute('mode', this.value)">
-  <option value="auto">Auto</option>
-  <option value="light">Light</option>
-  <option value="dark">Dark</option>
-  <option value="orange-green">Orange Green</option>
-  <option value="blue-yellow">Blue Yellow</option>
-  </select>
-  </label>
-</section>
-
+  <h1>MIDI Machines</h1>
+  <p>The MIDI Machines are a collection of <a href="https://developer.mozilla.org/en-US/docs/Web/Web_Components">Web Components</a> for building musical creative coding projects.</p>
+  <ul>
+    <li><a href="demo/piano-keyboard.html">Piano Keyboard</a></li>
+    <li><a href="demo/nanopad2.html">nanoPAD2</a></li>
+  </ul>  
 </body>
-
 </html>

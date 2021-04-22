@@ -25,6 +25,7 @@ The following attributes can be changed either in HTML or with [`setAttribute()`
   * `blue-yellow`
 * `onpaddown` - Pad press event listener
 * `onpadup` - Pad release event listener
+* `onxymove` - XY pad touch event listener
 
 ##### HTML Attribute Example
 
@@ -43,15 +44,27 @@ It is also possible to listen for pad events through the following [CustomEvents
 
 * `paddown`
 * `padup`
+* `onxymove`
 
-The event listener callback receives a CustomEvent with a [detail](https://developer.mozilla.org/en-US/docs/Web/API/CustomEvent/detail) property with the following interface.
+The event listener callback for pad events receive a CustomEvent with a [detail](https://developer.mozilla.org/en-US/docs/Web/API/CustomEvent/detail) property with the following interface.
 
 ```ts
-interface NoteEventDetails {
+interface NoteEventDetail {
   pitch: number, // MIDI note number
   velocity: number // in range 0-127, defaults to 80 if not specified
 }
 ```
+
+XY touchpad events receive a CustomEvent with a detail property with the following interface.
+
+```ts
+interface XYEventDetail {
+  x?: number, // in range 0-127, for left to right
+  y?: number // in range 0-127, from bottom to top
+}
+```
+
+Only one of `x` or `y` will be present on the object. Note that the `y` attribute goes from top to bottom, which is consistent with the device's y axis, but not with the DOM.
 
 ##### JavaScript Event Listener Example
 
