@@ -5,6 +5,8 @@
   <meta charset="utf-8">
   <title>nanoPAD2</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="dark light">
+  <meta name="theme-color" content="#404040">
   <script src="../src/nanopad2.js" type="module" charset="utf-8"></script>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Changa:wght@400;700&display=swap">
   <style media="screen">
@@ -91,7 +93,8 @@
       <div>XY Move</div>
       <textarea name="xymove" autocomplete="off" spellcheck="false">if ('x' in event.detail) {
   console.log(`XY Pad X = ${event.detail.x}`)
-} else if ('y' in event.detail) {
+}
+if ('y' in event.detail) {
   console.log(`XY Pad Y = ${event.detail.y}`)
 }</textarea>
     </div>

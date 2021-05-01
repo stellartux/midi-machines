@@ -236,6 +236,30 @@ label button {
 
     const xyPad = document.createElement('div')
     xyPad.id = 'xypad'
+    xyPad.addEventListener('mousemove', (event) => {
+      if (event.buttons === 1) {
+        const clamp = (x) => Math.floor(Math.min(Math.max(0, x), 127))
+        const borderWidth = Number(
+          getComputedStyle(xyPad).borderWidth.match(/^\d+(\.\d+)?/)[0]
+        )
+        this.dispatchEvent(
+          new CustomEvent('xymove', {
+            detail: {
+              x: clamp(
+                ((event.pageX - xyPad.offsetLeft - borderWidth / 2) * 128) /
+                  (xyPad.offsetWidth - borderWidth)
+              ),
+              y:
+                127 -
+                clamp(
+                  ((event.pageY - xyPad.offsetTop - borderWidth / 2) * 128) /
+                    (xyPad.offsetHeight - borderWidth)
+                ),
+            },
+          })
+        )
+      }
+    })
     this.main.append(xyPad)
 
     const padTemplate = document.createElement('div')
